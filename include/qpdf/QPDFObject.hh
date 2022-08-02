@@ -50,6 +50,7 @@ class QPDFObject
     typedef enum qpdf_object_type_e object_type_e;
     static constexpr object_type_e ot_uninitialized = ::ot_uninitialized;
     static constexpr object_type_e ot_reserved = ::ot_reserved;
+    static constexpr object_type_e ot_unresolved = ::ot_unresolved;
     static constexpr object_type_e ot_null = ::ot_null;
     static constexpr object_type_e ot_boolean = ::ot_boolean;
     static constexpr object_type_e ot_integer = ::ot_integer;
