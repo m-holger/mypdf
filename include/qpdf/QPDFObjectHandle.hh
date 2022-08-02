@@ -1453,12 +1453,6 @@ class QPDFObjectHandle
             return QPDFObjectHandle::newStream(
                 qpdf, og, stream_dict, offset, length);
         }
-        // Reserve an object with a specific ID
-        static QPDFObjectHandle
-        makeReserved()
-        {
-            return QPDFObjectHandle::makeReserved();
-        }
     };
     friend class Factory;
 
@@ -1578,7 +1572,6 @@ class QPDFObjectHandle
         QPDFObjectHandle stream_dict,
         qpdf_offset_t offset,
         size_t length);
-    static QPDFObjectHandle makeReserved();
 
     void typeWarning(char const* expected_type, std::string const& warning);
     void objectWarning(std::string const& warning);
