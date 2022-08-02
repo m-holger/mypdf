@@ -850,12 +850,6 @@ class QPDF
         {
             return qpdf->resolve(og);
         }
-        static bool
-        objectChanged(
-            QPDF* qpdf, QPDFObjGen const& og, std::shared_ptr<QPDFObject>& oph)
-        {
-            return qpdf->objectChanged(og, oph);
-        }
     };
     friend class Resolver;
 
@@ -1173,7 +1167,6 @@ class QPDF
         std::string const& description,
         QPDFObjGen const& exp_og,
         QPDFObjGen& og);
-    bool objectChanged(QPDFObjGen const& og, std::shared_ptr<QPDFObject>& oph);
     std::shared_ptr<QPDFObject> resolve(QPDFObjGen const& og);
     void resolveObjectsInStream(int obj_stream_number);
     void stopOnError(std::string const& message);
@@ -1728,7 +1721,6 @@ class QPDF
         bool in_parse;
         bool parsed;
         std::set<int> resolved_object_streams;
-        bool ever_replaced_objects;
 
         // Linearization data
         qpdf_offset_t first_xref_item_offset; // actual value from file
