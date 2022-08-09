@@ -1579,7 +1579,6 @@ class QPDFObjectHandle
         QPDF* qpdf,
         QPDFObjGen const& og,
         std::shared_ptr<QPDFObject> const& obj) :
-        initialized(true),
         qpdf(qpdf),
         og(og),
         obj(obj)
@@ -1656,8 +1655,6 @@ class QPDFObjectHandle
         std::string const& description, std::string& all_description);
     static void warn(QPDF*, QPDFExc const&);
     void checkOwnership(QPDFObjectHandle const&) const;
-
-    bool initialized;
 
     // Moving members of QPDFObjectHandle into a smart pointer incurs
     // a substantial performance penalty since QPDFObjectHandle
@@ -1905,13 +1902,13 @@ QPDFObjectHandle::getGeneration() const
 inline bool
 QPDFObjectHandle::isIndirect() const
 {
-    return initialized && (getObjectID() != 0);
+    return (obj != nullptr) && (getObjectID() != 0);
 }
 
 inline bool
 QPDFObjectHandle::isInitialized() const
 {
-    return initialized;
+    return obj != nullptr;
 }
 
 #endif // QPDFOBJECTHANDLE_HH
