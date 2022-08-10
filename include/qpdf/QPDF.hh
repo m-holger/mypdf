@@ -845,10 +845,10 @@ class QPDF
         friend class QPDFObjectHandle;
 
       private:
-        static std::shared_ptr<QPDFObject>
+        static void
         resolve(QPDF* qpdf, QPDFObjGen const& og)
         {
-            return qpdf->resolve(og);
+            qpdf->resolve(og);
         }
     };
     friend class Resolver;
@@ -1167,7 +1167,7 @@ class QPDF
         std::string const& description,
         QPDFObjGen const& exp_og,
         QPDFObjGen& og);
-    std::shared_ptr<QPDFObject> resolve(QPDFObjGen const& og);
+    void resolve(QPDFObjGen const& og);
     void resolveObjectsInStream(int obj_stream_number);
     void stopOnError(std::string const& message);
     QPDFObjectHandle reserveObjectIfNotExists(QPDFObjGen const& og);
