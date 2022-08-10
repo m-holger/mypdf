@@ -22,9 +22,9 @@ QPDF_Unresolved::shallowCopy()
 std::string
 QPDF_Unresolved::unparse()
 {
-    throw std::logic_error(
-        "attempted to unparse an unresolved QPDFObjectHandle");
-    return "";
+    // throw std::logic_error(
+    //     "attempted to unparse an unresolved QPDFObjectHandle");
+    return "null";
 }
 
 JSON
