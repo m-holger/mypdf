@@ -1174,6 +1174,8 @@ class QPDF
     QPDFObjectHandle reserveStream(QPDFObjGen const& og);
     QPDFObjectHandle
     newIndirect(QPDFObjGen const&, std::shared_ptr<QPDFObject> const&);
+    bool isCached(QPDFObjGen const& og);
+    bool isUnresolved(QPDFObjGen const& og);
 
     // Calls finish() on the pipeline when done but does not delete it
     bool pipeStreamData(
