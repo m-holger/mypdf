@@ -1596,7 +1596,6 @@ class QPDFObjectHandle
     };
 
     // Private object factory methods
-    static QPDFObjectHandle newIndirect(QPDF*, QPDFObjGen const& og);
     static QPDFObjectHandle newStream(
         QPDF* qpdf,
         QPDFObjGen const& og,

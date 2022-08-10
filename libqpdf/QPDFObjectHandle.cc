@@ -2055,6 +2055,7 @@ QPDFObjectHandle::parseInternal(
     contents_offset_stack.push_back(-1);
     while (!done) {
         bool bad = false;
+        bool indirect_ref = false;
         SparseOHArray& olist = olist_stack.back();
         parser_state_e state = state_stack.back();
         offset = offset_stack.back();
@@ -2232,11 +2233,18 @@ QPDFObjectHandle::parseInternal(
                             " on an object with indirect references");
                     }
                     // Try to resolve indirect objects
-                    object = newIndirect(
-                        context,
-                        QPDFObjGen(
-                            olist.at(olist.size() - 2).getIntValueAsInt(),
-                            olist.at(olist.size() - 1).getIntValueAsInt()));
+                    auto ref_og = QPDFObjGen(
+                        olist.at(olist.size() - 2).getIntValueAsInt(),
+                        olist.at(olist.size() - 1).getIntValueAsInt());
+                    if (ref_og.isIndirect()) {
+                        object = context->getObject(ref_og);
+                        indirect_ref = true;
+
+                    } else {
+                        QTC::TC(
+                            "qpdf", "QPDFObjectHandle indirect with 0 objid");
+                        object = newNull();
+                    }
                     olist.remove_last();
                     olist.remove_last();
                 } else if ((value == "endobj") && (state == st_top)) {
@@ -2348,14 +2356,16 @@ QPDFObjectHandle::parseInternal(
 
         case st_dictionary:
         case st_array:
-            setObjectDescriptionFromInput(
-                object,
-                context,
-                object_description,
-                input,
-                input->getLastOffset());
-            object.setParsedOffset(input->getLastOffset());
-            set_offset = true;
+            if (!indirect_ref) {
+                setObjectDescriptionFromInput(
+                    object,
+                    context,
+                    object_description,
+                    input,
+                    input->getLastOffset());
+                object.setParsedOffset(input->getLastOffset());
+                set_offset = true;
+            }
             olist.append(object);
             break;
 
@@ -2521,20 +2531,6 @@ QPDFObjectHandle::setParsedOffset(qpdf_offset_t offset)
     if (isInitialized()) {
         obj->setParsedOffset(offset);
     }
-}
-
-QPDFObjectHandle
-QPDFObjectHandle::newIndirect(QPDF* qpdf, QPDFObjGen const& og)
-{
-    if (!og.isIndirect()) {
-        // Special case: QPDF uses objid 0 as a sentinel for direct
-        // objects, and the PDF specification doesn't allow for object
-        // 0. Treat indirect references to object 0 as null so that we
-        // never create an indirect object with objid 0.
-        QTC::TC("qpdf", "QPDFObjectHandle indirect with 0 objid");
-        return newNull();
-    }
-    return QPDFObjectHandle(qpdf, og, QPDF_Unresolved::create());
 }
 
 QPDFObjectHandle
