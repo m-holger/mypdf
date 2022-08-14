@@ -969,7 +969,7 @@ class QPDFObjectHandle
     // Return the QPDF object that owns an indirect object.  Returns
     // null for a direct object.
     QPDF_DLL
-    QPDF* getOwningQPDF();
+    inline QPDF* getOwningQPDF() const;
 
     // Create a shallow copy of an object as a direct object, but do not
     // traverse across indirect object boundaries. That means that,
@@ -1579,7 +1579,6 @@ class QPDFObjectHandle
         QPDF* qpdf,
         QPDFObjGen const& og,
         std::shared_ptr<QPDFObject> const& obj) :
-        qpdf(qpdf),
         og(og),
         obj(obj)
     {
@@ -1658,7 +1657,6 @@ class QPDFObjectHandle
     // Moving members of QPDFObjectHandle into a smart pointer incurs
     // a substantial performance penalty since QPDFObjectHandle
     // objects are copied around so frequently.
-    QPDF* qpdf;
     QPDFObjGen og;
     std::shared_ptr<QPDFObject> obj;
 };
@@ -1879,6 +1877,13 @@ class QPDFObjectHandle::QPDFArrayItems
   private:
     QPDFObjectHandle oh;
 };
+
+inline QPDF*
+QPDFObjectHandle::getOwningQPDF() const
+{
+    // Will be null for direct objects
+    return isInitialized() ? this->obj->getQPDF() : nullptr;
+}
 
 inline QPDFObjGen
 QPDFObjectHandle::getObjGen() const

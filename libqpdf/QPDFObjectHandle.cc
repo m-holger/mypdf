@@ -234,13 +234,11 @@ LastChar::getLastChar()
     return this->last_char;
 }
 
-QPDFObjectHandle::QPDFObjectHandle() :
-    qpdf(nullptr)
+QPDFObjectHandle::QPDFObjectHandle()
 {
 }
 
 QPDFObjectHandle::QPDFObjectHandle(std::shared_ptr<QPDFObject> const& data) :
-    qpdf(nullptr),
     obj(data)
 {
 }
@@ -1285,14 +1283,6 @@ QPDFObjectHandle::getUniqueResourceName(
     // number of keys we're checking against.
     throw std::logic_error("unable to find unconflicting name in"
                            " QPDFObjectHandle::getUniqueResourceName");
-}
-
-// Indirect object accessors
-QPDF*
-QPDFObjectHandle::getOwningQPDF()
-{
-    // Will be null for direct objects
-    return this->qpdf;
 }
 
 // Dictionary mutators
@@ -2815,7 +2805,6 @@ QPDFObjectHandle::copyObject(
                                " reserved object handle direct");
     }
 
-    qpdf = nullptr;
     og = QPDFObjGen();
 
     std::shared_ptr<QPDFObject> new_obj;
@@ -3103,8 +3092,9 @@ QPDFObjectHandle::isImage(bool exclude_imagemask)
 void
 QPDFObjectHandle::checkOwnership(QPDFObjectHandle const& item) const
 {
-    if ((this->qpdf != nullptr) && (item.qpdf != nullptr) &&
-        (this->qpdf != item.qpdf)) {
+    auto qpdf = getOwningQPDF();
+    auto item_qpdf = item.getOwningQPDF();
+    if ((qpdf != nullptr) && (item_qpdf != nullptr) && (qpdf != item_qpdf)) {
         QTC::TC("qpdf", "QPDFObjectHandle check ownership");
         throw std::logic_error(
             "Attempting to add an object from a different QPDF."
