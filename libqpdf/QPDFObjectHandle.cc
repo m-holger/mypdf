@@ -234,15 +234,6 @@ LastChar::getLastChar()
     return this->last_char;
 }
 
-QPDFObjectHandle::QPDFObjectHandle()
-{
-}
-
-QPDFObjectHandle::QPDFObjectHandle(std::shared_ptr<QPDFObject> const& data) :
-    obj(data)
-{
-}
-
 void
 QPDFObjectHandle::releaseResolved()
 {
