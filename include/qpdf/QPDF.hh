@@ -842,7 +842,7 @@ class QPDF
     // it can resolve indirect references.
     class Resolver
     {
-        friend class QPDFObjectHandle;
+        friend class QPDFObject;
 
       private:
         static void
