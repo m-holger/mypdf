@@ -34,7 +34,7 @@ class QPDFOutlineObjectHelper: public QPDFObjectHelper
 {
   public:
     QPDF_DLL
-    ~QPDFOutlineObjectHelper() override
+    ~QPDFOutlineObjectHelper()
     {
         // This must be cleared explicitly to avoid circular references that prevent cleanup of
         // shared pointers.

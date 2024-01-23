@@ -39,7 +39,7 @@ class QPDFPageObjectHelper: public QPDFObjectHelper
     QPDF_DLL
     QPDFPageObjectHelper(QPDFObjectHandle);
     QPDF_DLL
-    ~QPDFPageObjectHelper() override = default;
+    ~QPDFPageObjectHelper() = default;
 
     // PAGE ATTRIBUTES
 

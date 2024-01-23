@@ -39,8 +39,8 @@ class QPDF_DLL_CLASS QPDFObjectHelper
         oh(oh)
     {
     }
-    QPDF_DLL
-    virtual ~QPDFObjectHelper();
+//    QPDF_DLL
+//    virtual ~QPDFObjectHelper();
     QPDF_DLL
     QPDFObjectHandle
     getObjectHandle()
@@ -56,6 +56,7 @@ class QPDF_DLL_CLASS QPDFObjectHelper
 
   protected:
     QPDFObjectHandle oh;
+    ~QPDFObjectHelper() = default;
 };
 
 #endif // QPDFOBJECTHELPER_HH
