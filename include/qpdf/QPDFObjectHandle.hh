@@ -297,7 +297,11 @@ class QPDFObjectHandle
     QPDF_DLL
     QPDFObjectHandle& operator=(QPDFObjectHandle&&) = default;
 #endif
-
+    QPDF_DLL
+    operator QPDFObjGen() const noexcept
+    {
+        return getObjGen();
+    }
     QPDF_DLL
     inline bool isInitialized() const;
 

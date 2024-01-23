@@ -39,8 +39,8 @@ class QPDF_DLL_CLASS QPDFObjectHelper
         oh(oh)
     {
     }
-//    QPDF_DLL
-//    virtual ~QPDFObjectHelper();
+    //    QPDF_DLL
+    //    virtual ~QPDFObjectHelper();
     QPDF_DLL
     QPDFObjectHandle
     getObjectHandle()
@@ -52,6 +52,16 @@ class QPDF_DLL_CLASS QPDFObjectHelper
     getObjectHandle() const
     {
         return this->oh;
+    }
+    QPDF_DLL
+    operator QPDFObjectHandle() const noexcept
+    {
+        return oh;
+    }
+    QPDF_DLL
+    operator QPDFObjGen() const noexcept
+    {
+        return oh.getObjGen();
     }
 
   protected:

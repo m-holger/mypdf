@@ -53,9 +53,9 @@ QPDFAcroFormDocumentHelper::addFormField(QPDFFormFieldObjectHelper ff)
     if (!fields.isArray()) {
         fields = acroform.replaceKeyAndGetNew("/Fields", QPDFObjectHandle::newArray());
     }
-    fields.appendItem(ff.getObjectHandle());
+    fields.appendItem(ff);
     QPDFObjGen::set visited;
-    traverseField(ff.getObjectHandle(), QPDFObjectHandle::newNull(), 0, visited);
+    traverseField(ff, QPDFObjectHandle::newNull(), 0, visited);
 }
 
 void
@@ -187,7 +187,7 @@ QPDFAcroFormDocumentHelper::getAnnotationsForField(QPDFFormFieldObjectHelper h)
 {
     analyze();
     std::vector<QPDFAnnotationObjectHelper> result;
-    QPDFObjGen og(h.getObjectHandle().getObjGen());
+    QPDFObjGen og(h);
     if (m->field_to_annotations.count(og)) {
         result = m->field_to_annotations[og];
     }
@@ -224,9 +224,8 @@ QPDFAcroFormDocumentHelper::getFieldForAnnotation(QPDFAnnotationObjectHelper h)
         return result;
     }
     analyze();
-    QPDFObjGen og(oh.getObjGen());
-    if (m->annotation_to_field.count(og)) {
-        result = m->annotation_to_field[og];
+    if (m->annotation_to_field.count(h)) {
+        result = m->annotation_to_field[h];
     }
     return result;
 }
@@ -266,20 +265,18 @@ QPDFAcroFormDocumentHelper::analyze()
     // actually work with most viewers.
 
     for (auto const& ph: QPDFPageDocumentHelper(this->qpdf).getAllPages()) {
-        for (auto const& iter: getWidgetAnnotationsForPage(ph)) {
-            QPDFObjectHandle annot(iter.getObjectHandle());
-            QPDFObjGen og(annot.getObjGen());
-            if (m->annotation_to_field.count(og) == 0) {
+        for (auto& iter: getWidgetAnnotationsForPage(ph)) {
+            if (m->annotation_to_field.count(iter) == 0) {
                 QTC::TC("qpdf", "QPDFAcroFormDocumentHelper orphaned widget");
                 // This is not supposed to happen, but it's easy enough for us to handle this case.
                 // Treat the annotation as its own field. This could allow qpdf to sensibly handle a
                 // case such as a PDF creator adding a self-contained annotation (merged with the
                 // field dictionary) to the page's /Annots array and forgetting to also put it in
                 // /AcroForm.
-                annot.warnIfPossible("this widget annotation is not"
+                iter.getObjectHandle().warnIfPossible("this widget annotation is not"
                                      " reachable from /AcroForm in the document catalog");
-                m->annotation_to_field[og] = QPDFFormFieldObjectHelper(annot);
-                m->field_to_annotations[og].emplace_back(annot);
+                m->annotation_to_field[iter] = QPDFFormFieldObjectHelper(iter);
+                m->field_to_annotations[iter].emplace_back(iter);
             }
         }
     }
@@ -425,7 +422,7 @@ QPDFAcroFormDocumentHelper::disableDigitalSignatures()
         auto ft = f.getFieldType();
         if (ft == "/Sig") {
             auto oh = f.getObjectHandle();
-            to_remove.insert(oh.getObjGen());
+            to_remove.insert(f);
             // Make this no longer a form field. If it's also an annotation, the annotation will
             // survive. If it's only a field and is no longer referenced, it will disappear.
             oh.removeKey("/FT");

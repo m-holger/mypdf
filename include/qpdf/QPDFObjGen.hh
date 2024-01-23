@@ -120,11 +120,11 @@ class QPDFObjGen
             return true;
         }
 
-        QPDF_DLL
-        bool add(QPDFObjectHandle const& oh);
-
-        QPDF_DLL
-        bool add(QPDFObjectHelper const& oh);
+//        QPDF_DLL
+//        bool add(QPDFObjectHandle const& oh);
+//
+//        QPDF_DLL
+//        bool add(QPDFObjectHelper const& oh);
 
         QPDF_DLL
         void
@@ -135,11 +135,11 @@ class QPDFObjGen
             }
         }
 
-        QPDF_DLL
-        void erase(QPDFObjectHandle const& oh);
-
-        QPDF_DLL
-        void erase(QPDFObjectHelper const& oh);
+//        QPDF_DLL
+//        void erase(QPDFObjectHandle const& oh);
+//
+//        QPDF_DLL
+//        void erase(QPDFObjectHelper const& oh);
     };
 
   private:
