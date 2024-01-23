@@ -220,6 +220,11 @@ LastChar::getLastChar()
     return this->last_char;
 }
 
+QPDFObjectHandle::operator QPDFObjGen() const noexcept
+{
+    return obj ? obj->getObjGen() : QPDFObjGen();
+}
+
 #ifndef QPDF_FUTURE
 bool
 QPDFObjectHandle::isSameObjectAs(QPDFObjectHandle const& rhs) const

@@ -297,6 +297,9 @@ class QPDFObjectHandle
     QPDFObjectHandle& operator=(QPDFObjectHandle&&) = default;
 
     QPDF_DLL
+    operator QPDFObjGen() const noexcept;
+
+    QPDF_DLL
     inline bool isInitialized() const;
 
     // This method returns true if the QPDFObjectHandle objects point to exactly the same underlying
