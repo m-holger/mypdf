@@ -9,3 +9,20 @@ coverage:
     patch:
       default:
         informational: true
+
+component_management:
+  individual_components:
+    - component_id: app
+      name: qpdf
+      paths:
+        - qpdf/qpdf.cc
+        - qpdf/fix-qdf.cc
+    - component_id: lib
+      name: libqpdf
+      paths:
+        - qpdflib/*
+        - qpdflib/qpdf/*
+    - component_id: examples
+      name: examples
+      paths:
+        - examples/*
