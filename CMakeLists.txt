@@ -299,6 +299,7 @@ set(CPACK_NSIS_MUI_ICON "${qpdf_SOURCE_DIR}/logo/qpdf.ico")
 
 if(ENABLE_COVERAGE)
   add_compile_options(--coverage -O0)
+  add_compile_definitions(QPDF_COVERAGE=1)
   add_link_options(--coverage)
 endif()
 

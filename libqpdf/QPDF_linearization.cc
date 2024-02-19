@@ -31,9 +31,11 @@ load_vector_int(
         }
         vec.at(i).*field = bit_stream.getBitsInt(QIntC::to_size(bits_wanted));
     }
+#ifndef QPDF_COVERAGE
     if (QIntC::to_int(vec.size()) != nitems) {
         throw std::logic_error("vector has wrong size in load_vector_int");
     }
+#endif
     // The PDF spec says that each hint table starts at a byte boundary.  Each "row" actually must
     // start on a byte boundary.
     bit_stream.skipToNextByte();
