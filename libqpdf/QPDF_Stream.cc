@@ -191,15 +191,19 @@ QPDF_Stream::getStreamJSON(
     Pipeline* p,
     std::string const& data_filename)
 {
+
     Pl_Buffer pb{"streamjson"};
+#ifndef QPDF_COVERAGE
     JSON::Writer jw{&pb, 0};
     decode_level =
         writeStreamJSON(json_version, jw, json_data, decode_level, p, data_filename, true);
     pb.finish();
+#endif
     auto result = JSON::parse(pb.getString());
     if (json_data == qpdf_sj_inline) {
         result.addDictionaryMember("data", JSON::makeBlob(StreamBlobProvider(this, decode_level)));
     }
+    std::cout << "Untested new line\n";
     return result;
 }
 
