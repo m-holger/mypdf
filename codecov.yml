@@ -26,3 +26,9 @@ component_management:
       name: examples
       paths:
         - examples/*
+
+ignore:
+  - fuzz/**/*
+  - compare-for-test/**/*
+  - libtests/**/*
+  - qpdf/test*
