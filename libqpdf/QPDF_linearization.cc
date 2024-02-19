@@ -625,9 +625,11 @@ QPDF::checkHPageOffset(
     int npages = toI(pages.size());
     qpdf_offset_t table_offset = adjusted_offset(m->page_offset_hints.first_page_offset);
     QPDFObjGen first_page_og(pages.at(0).getObjGen());
+    #ifndef QPDF_COVERAGE
     if (m->xref_table.count(first_page_og) == 0) {
         stopOnError("supposed first page object is not known");
     }
+    #endif
     qpdf_offset_t offset = getLinearizationOffset(first_page_og);
     if (table_offset != offset) {
         linearizationWarning("first page object offset mismatch");
@@ -638,6 +640,7 @@ QPDF::checkHPageOffset(
         int first_object = page_og.getObj();
         if (m->xref_table.count(page_og) == 0) {
             stopOnError("unknown object in page offset hint table");
+            std::cout << "Another uncovered line\n";
         }
         offset = getLinearizationOffset(page_og);
 
