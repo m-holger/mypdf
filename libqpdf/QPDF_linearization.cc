@@ -641,6 +641,7 @@ QPDF::checkHPageOffset(
         if (m->xref_table.count(page_og) == 0) {
             stopOnError("unknown object in page offset hint table");
             std::cout << "Another uncovered line\n";
+            std::cout << "Another uncovered line\n";
         }
         offset = getLinearizationOffset(page_og);
 

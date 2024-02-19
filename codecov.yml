@@ -20,8 +20,8 @@ component_management:
     - component_id: lib
       name: libqpdf
       paths:
-        - qpdflib/*
-        - qpdflib/qpdf/*
+        - libqpdf/*
+        - libqpdf/qpdf/*
     - component_id: examples
       name: examples
       paths:
