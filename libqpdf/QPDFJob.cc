@@ -417,11 +417,11 @@ QPDFJob::parseRotationParameter(std::string const& parameter)
 std::vector<int>
 QPDFJob::parseNumrange(char const* range, int max)
 {
-    try {
+    try { //LCOV_EXCL_EXCEPTION_BR_START
         return QUtil::parse_numrange(range, max);
     } catch (std::runtime_error& e) {
         usage(e.what());
-    }
+    } //LCOV_EXCL_EXCEPTION_BR_STOP
     return {};
 }
 

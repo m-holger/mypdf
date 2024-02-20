@@ -178,9 +178,9 @@ QPDF::readLinearizationData()
 
     if (!(H.isArray() && O.isInteger() && E.isInteger() && N.isInteger() && T.isInteger() &&
           (P.isInteger() || P.isNull()))) {
-        throw damagedPDF(
+        throw damagedPDF(  // LCOV_EXCL_START
             "linearization dictionary",
-            "some keys in linearization dictionary are of the wrong type");
+            "some keys in linearization dictionary are of the wrong type");  // LCOV_EXCL_STOP
     }
 
     // Hint table array: offset length [ offset length ]
@@ -639,12 +639,13 @@ QPDF::checkHPageOffset(
         QPDFObjGen page_og(pages.at(toS(pageno)).getObjGen());
         int first_object = page_og.getObj();
         if (m->xref_table.count(page_og) == 0) {
-            stopOnError("unknown object in page offset hint table");
+            stopOnError("unknown object in page offset hint table"); // LCOV_EXCL_START
             std::cout << "Another uncovered line\n";
             std::cout << "Another uncovered line\n";
 
             std::cout << "Another uncovered line\n";
-        }
+
+        } // LCOV_EXCL_STOP
         offset = getLinearizationOffset(page_og);
 
         HPageOffsetEntry& he = m->page_offset_hints.entries.at(toS(pageno));

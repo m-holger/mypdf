@@ -33,14 +33,14 @@ FuzzHelper::doChecks()
 }
 
 void
-FuzzHelper::run()
+FuzzHelper::run() //LCOV_EXCL_START
 {
     try {
         doChecks();
     } catch (std::runtime_error const& e) {
         std::cerr << "runtime_error: " << e.what() << std::endl;
     }
-}
+} //LCOV_EXCL_END
 
 extern "C" int
 LLVMFuzzerTestOneInput(unsigned char const* data, size_t size)

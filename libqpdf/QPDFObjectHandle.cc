@@ -1190,8 +1190,8 @@ QPDFObjectHandle::getUniqueResourceName(
     // This could only happen if there is a coding error.
     // The number of candidates we test is more than the
     // number of keys we're checking against.
-    throw std::logic_error("unable to find unconflicting name in"
-                           " QPDFObjectHandle::getUniqueResourceName");
+    throw std::logic_error("unable to find unconflicting name in" //LCOV_EXCL_LINE
+                           " QPDFObjectHandle::getUniqueResourceName"); //LCOV_EXCL_LINE
 }
 
 // Dictionary mutators
