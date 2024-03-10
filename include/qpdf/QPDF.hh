@@ -792,12 +792,19 @@ class QPDF
     class Resolver
     {
         friend class QPDFObject;
+        friend class QPDF_Unresolved;
 
       private:
         static void
-        resolve(QPDF* qpdf, QPDFObjGen const& og)
+        resolve(QPDF* qpdf, QPDFObjGen og)
         {
             qpdf->resolve(og);
+        }
+        static QPDFObject*
+        getResolved(QPDF* qpdf, QPDFObjGen og)
+        {
+            qpdf->resolve(og);
+            return qpdf->m->obj_cache[og].object.get();
         }
     };
 

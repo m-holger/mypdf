@@ -1,6 +1,7 @@
 #include <qpdf/QPDF_Unresolved.hh>
 
-#include <stdexcept>
+#include <qpdf/QPDF.hh>
+#include <qpdf/QPDFObject_private.hh>
 
 QPDF_Unresolved::QPDF_Unresolved(QPDF* qpdf, QPDFObjGen const& og) :
     QPDFValue(::ot_unresolved, "unresolved", qpdf, og)
@@ -16,19 +17,23 @@ QPDF_Unresolved::create(QPDF* qpdf, QPDFObjGen const& og)
 std::shared_ptr<QPDFObject>
 QPDF_Unresolved::copy(bool shallow)
 {
-    throw std::logic_error("attempted to shallow copy an unresolved QPDFObjectHandle");
-    return nullptr;
+    return QPDF::Resolver::getResolved(qpdf, og)->copy(shallow);
 }
 
 std::string
 QPDF_Unresolved::unparse()
 {
-    throw std::logic_error("attempted to unparse an unresolved QPDFObjectHandle");
-    return "";
+    return QPDF::Resolver::getResolved(qpdf, og)->unparse();
 }
 
 void
 QPDF_Unresolved::writeJSON(int json_version, JSON::Writer& p)
 {
-    throw std::logic_error("attempted to get JSON from an unresolved QPDFObjectHandle");
+    QPDF::Resolver::getResolved(qpdf, og)->writeJSON(json_version, p);
+}
+
+std::string
+QPDF_Unresolved::getStringValue() const
+{
+    return QPDF::Resolver::getResolved(qpdf, og)->getStringValue();
 }
