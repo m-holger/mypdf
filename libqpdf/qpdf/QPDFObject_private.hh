@@ -5,8 +5,8 @@
 // include/qpdf/QPDFObject.hh. See comments there for an explanation.
 
 #include <qpdf/Constants.h>
-#include <qpdf/DLL.h>
 #include <qpdf/JSON.hh>
+#include <qpdf/QPDF.hh>
 #include <qpdf/QPDFValue.hh>
 #include <qpdf/Types.h>
 
@@ -43,18 +43,26 @@ class QPDFObject
     {
         return value->getStringValue();
     }
+    // Return a unique type code for the resolved object
+    qpdf_object_type_e
+    getResolvedTypeCode() const
+    {
+        auto tc = value->type_code;
+        return tc == ::ot_unresolved
+            ? QPDF::Resolver::getResolved(value->qpdf, value->og)->value->type_code
+            : tc;
+    }
     // Return a unique type code for the object
     qpdf_object_type_e
-    getTypeCode() const
+    getTypeCode() const noexcept
     {
         return value->type_code;
     }
-
     // Return a string literal that describes the type, useful for debugging and testing
     char const*
     getTypeName() const
     {
-        return value->type_name;
+        return resolved_object()->value->type_name;
     }
 
     QPDF*
@@ -164,13 +172,25 @@ class QPDFObject
             doResolve();
         }
     }
+    const QPDFObject*
+    resolved_object() const
+    {
+        return isUnresolved() ? QPDF::Resolver::getResolved(value->qpdf, value->og) : this;
+    }
+
     void doResolve();
 
     template <typename T>
     T*
-    as()
+    as() const
     {
-        return dynamic_cast<T*>(value.get());
+        if (auto result = dynamic_cast<T*>(value.get())) {
+            return result;
+        } else {
+            return isUnresolved()
+                ? dynamic_cast<T*>(QPDF::Resolver::getResolved(value->qpdf, value->og)->value.get())
+                : nullptr;
+        }
     }
 
   private:
