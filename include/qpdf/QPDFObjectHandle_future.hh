@@ -19,8 +19,8 @@
 // continue to consider qpdf to be licensed under those terms. Please
 // see the manual for additional information.
 
-#ifndef QPDFOBJECTHANDLE_CORE_HH
-#define QPDFOBJECTHANDLE_CORE_HH
+#ifndef QPDFOBJECTHANDLE_FUTURE_HH
+#define QPDFOBJECTHANDLE_FUTURE_HH
 
 #include <qpdf/Constants.h>
 #include <qpdf/DLL.h>
@@ -290,6 +290,11 @@ class QPDFObjectHandle
     QPDFObjectHandle(QPDFObjectHandle const&) = default;
     QPDF_DLL
     QPDFObjectHandle& operator=(QPDFObjectHandle const&) = default;
+
+    QPDF_DLL
+    QPDFObjectHandle(QPDFObjectHandle&&) = default;
+    QPDF_DLL
+    QPDFObjectHandle& operator=(QPDFObjectHandle&&) = default;
 
     QPDF_DLL
     inline bool isInitialized() const;
@@ -1410,4 +1415,4 @@ QPDFObjectHandle operator ""_qpdf(char const* v, size_t len);
 
 #endif // QPDF_NO_QPDF_STRING
 
-#endif // QPDFOBJECTHANDLE_CORE_HH
+#endif // QPDFOBJECTHANDLE_FUTURE_HH
