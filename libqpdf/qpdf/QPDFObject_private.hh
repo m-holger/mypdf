@@ -49,7 +49,7 @@ class QPDFObject
     {
         auto tc = value->type_code;
         return tc == ::ot_unresolved
-            ? QPDF::Resolver::getResolved(value->qpdf, value->og)->value->type_code
+            ? QPDF::Resolver::resolved(value->qpdf, value->og)->value->type_code
             : tc;
     }
     // Return a unique type code for the object
@@ -165,20 +165,11 @@ class QPDFObject
     {
         return value->type_code == ::ot_unresolved;
     }
-    void
-    resolve()
-    {
-        if (isUnresolved()) {
-            doResolve();
-        }
-    }
     const QPDFObject*
     resolved_object() const
     {
-        return isUnresolved() ? QPDF::Resolver::getResolved(value->qpdf, value->og) : this;
+        return isUnresolved() ? QPDF::Resolver::resolved(value->qpdf, value->og) : this;
     }
-
-    void doResolve();
 
     template <typename T>
     T*
@@ -188,7 +179,7 @@ class QPDFObject
             return result;
         } else {
             return isUnresolved()
-                ? dynamic_cast<T*>(QPDF::Resolver::getResolved(value->qpdf, value->og)->value.get())
+                ? dynamic_cast<T*>(QPDF::Resolver::resolved(value->qpdf, value->og)->value.get())
                 : nullptr;
         }
     }
