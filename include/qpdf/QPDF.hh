@@ -795,16 +795,10 @@ class QPDF
         friend class QPDF_Unresolved;
 
       private:
-        static void
-        resolve(QPDF* qpdf, QPDFObjGen og)
-        {
-            qpdf->resolve(og);
-        }
         static QPDFObject*
-        getResolved(QPDF* qpdf, QPDFObjGen og)
+        resolved(QPDF* qpdf, QPDFObjGen og)
         {
-            qpdf->resolve(og);
-            return qpdf->m->obj_cache[og].object.get();
+            return qpdf->resolve(og);
         }
     };
 
@@ -1064,7 +1058,7 @@ class QPDF
         QPDFObjGen exp_og,
         QPDFObjGen& og,
         bool skip_cache_if_in_xref);
-    void resolve(QPDFObjGen og);
+    QPDFObject* resolve(QPDFObjGen og);
     void resolveObjectsInStream(int obj_stream_number);
     void stopOnError(std::string const& message);
     QPDFObjectHandle reserveStream(QPDFObjGen const& og);

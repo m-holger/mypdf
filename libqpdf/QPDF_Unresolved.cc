@@ -17,23 +17,23 @@ QPDF_Unresolved::create(QPDF* qpdf, QPDFObjGen const& og)
 std::shared_ptr<QPDFObject>
 QPDF_Unresolved::copy(bool shallow)
 {
-    return QPDF::Resolver::getResolved(qpdf, og)->copy(shallow);
+    return QPDF::Resolver::resolved(qpdf, og)->copy(shallow);
 }
 
 std::string
 QPDF_Unresolved::unparse()
 {
-    return QPDF::Resolver::getResolved(qpdf, og)->unparse();
+    return QPDF::Resolver::resolved(qpdf, og)->unparse();
 }
 
 void
 QPDF_Unresolved::writeJSON(int json_version, JSON::Writer& p)
 {
-    QPDF::Resolver::getResolved(qpdf, og)->writeJSON(json_version, p);
+    QPDF::Resolver::resolved(qpdf, og)->writeJSON(json_version, p);
 }
 
 std::string
 QPDF_Unresolved::getStringValue() const
 {
-    return QPDF::Resolver::getResolved(qpdf, og)->getStringValue();
+    return QPDF::Resolver::resolved(qpdf, og)->getStringValue();
 }
