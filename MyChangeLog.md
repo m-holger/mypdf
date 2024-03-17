@@ -23,8 +23,11 @@ Change Log
   objects are uncommon (especially in pdf files with object streams where encountering one unresolved object resolves a
   large number of them) as a first encounter will resolve them.
 
-- Make QPDFObjectHandle accessor const where possible. This relies on the refactoring of resolving unresolved objects. 
+- In FUTURE, Make QPDFObjectHandle accessor const where possible. This relies on the refactoring of resolving unresolved
+  objects.
 
 2024-04-21
 
-- Make QPDFObjectHandle::getTypeName also const (omission in last change).
+- In FUTURE, make QPDFObjectHandle::getTypeName also const (omission in last change).
+
+- In FUTURE, treat uninitialized objects as null objects. . See qpdf PR1179 for a summary of the rational.

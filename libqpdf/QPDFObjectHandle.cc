@@ -252,6 +252,11 @@ qpdf_object_type_e
 QPDFObjectHandle::getTypeCode() const
 #endif
 {
+#ifndef QPDF_FUTURE
+    return isInitialized() ? this->obj->getResolvedTypeCode() : ::ot_uninitialized;
+#else
+    return isInitialized() ? this->obj->getResolvedTypeCode() : ::ot_null;
+#endif
     return isInitialized() ? obj->getResolvedTypeCode() : ::ot_uninitialized;
 }
 
@@ -263,6 +268,11 @@ char const*
 QPDFObjectHandle::getTypeName() const
 #endif
 {
+#ifndef QPDF_FUTURE
+    return isInitialized() ? this->obj->getTypeName() : "uninitialized";
+#else
+    return isInitialized() ? this->obj->getTypeName() : "null";
+#endif
     return isInitialized() ? this->obj->getTypeName() : "uninitialized";
 }
 
@@ -373,19 +383,26 @@ QPDFObjectHandle::isDirectNull() const
 {
     // Don't call dereference() -- this is a const method, and we know
     // objid == 0, so there's nothing to resolve.
-    return (isInitialized() && (getObjectID() == 0) && (obj->getTypeCode() == ::ot_null));
+#ifdef QPDF_FUTURE
+    return !obj || (getObjectID() == 0 && obj->getTypeCode() == ::ot_null);
+#else
+    return isInitialized() && getObjectID() == 0 && obj->getTypeCode() == ::ot_null;
+#endif
 }
 
 #ifndef QPDF_FUTURE
 bool
 QPDFObjectHandle::isNull()
+{
+    return isInitialized() && obj->getResolvedTypeCode() == ::ot_null;
+}
 #else
 bool
 QPDFObjectHandle::isNull() const
-#endif
 {
-    return isInitialized() && (obj->getResolvedTypeCode() == ::ot_null);
+    return !obj || obj->getResolvedTypeCode() == ::ot_null;
 }
+#endif
 
 #ifndef QPDF_FUTURE
 bool
@@ -1265,7 +1282,10 @@ QPDFObjectHandle
 QPDFObjectHandle::getKeyIfDict(std::string const& key) const
 #endif
 {
+#ifndef QPDF_FUTURE
     return isNull() ? newNull() : getKey(key);
+#endif
+    return isNull() ? QPDFObjectHandle() : getKey(key);
 }
 
 #ifndef QPDF_FUTURE
@@ -1276,15 +1296,13 @@ std::set<std::string>
 QPDFObjectHandle::getKeys() const
 #endif
 {
-    std::set<std::string> result;
-    auto dict = asDictionary();
-    if (dict) {
-        result = dict->getKeys();
+    if (auto dict = asDictionary()) {
+        return dict->getKeys();
     } else {
         typeWarning("dictionary", "treating as empty");
         QTC::TC("qpdf", "QPDFObjectHandle dictionary empty set for getKeys");
     }
-    return result;
+    return {};
 }
 
 #ifndef QPDF_FUTURE
@@ -1298,12 +1316,12 @@ QPDFObjectHandle::getDictAsMap() const
     std::map<std::string, QPDFObjectHandle> result;
     auto dict = asDictionary();
     if (dict) {
-        result = dict->getAsMap();
+        return dict->getAsMap();
     } else {
         typeWarning("dictionary", "treating as empty");
         QTC::TC("qpdf", "QPDFObjectHandle dictionary empty map for asMap");
     }
-    return result;
+    return {};
 }
 
 // Array and Name accessors
@@ -1539,13 +1557,15 @@ QPDFObjectHandle::removeKey(std::string const& key)
 QPDFObjectHandle
 QPDFObjectHandle::removeKeyAndGetOld(std::string const& key)
 {
-    auto result = QPDFObjectHandle::newNull();
-    auto dict = asDictionary();
-    if (dict) {
-        result = dict->getKey(key);
+    if (auto dict = asDictionary()) {
+        auto result = dict->getKey(key);
+        removeKey(key);
+        return result;
     }
-    removeKey(key);
-    return result;
+#ifndef QPDF_FUTURE
+    return QPDFObjectHandle::newNull();
+#endif
+    return {};
 }
 
 void
@@ -1900,7 +1920,11 @@ QPDFObjectHandle::unparseResolved() const
 #endif
 {
     if (!isInitialized()) {
+#ifndef QPDF_FUTURE
         throw std::logic_error("attempted to dereference an uninitialized QPDFObjectHandle");
+#else
+        return "null";
+#endif
     }
     return obj->unparse();
 }
@@ -1942,8 +1966,12 @@ QPDFObjectHandle::getJSON(int json_version, bool dereference_indirect) const
 {
     if ((!dereference_indirect) && isIndirect()) {
         return JSON::makeString(unparse());
-    } else if (!isInitialized()) {
+    } else if (!obj) {
+#ifndef QPDF_FUTURE
         throw std::logic_error("attempted to dereference an uninitialized QPDFObjectHandle");
+#else
+        return JSON::makeNull();
+#endif
     } else {
         Pl_Buffer p{"json"};
         JSON::Writer jw{&p, 0};
@@ -1963,8 +1991,12 @@ QPDFObjectHandle::writeJSON(int json_version, JSON::Writer& p, bool dereference_
 {
     if (!dereference_indirect && isIndirect()) {
         p << "\"" << getObjGen().unparse(' ') << " R\"";
-    } else if (!isInitialized()) {
+    } else if (!obj) {
+#ifndef QPDF_FUTURE
         throw std::logic_error("attempted to dereference an uninitialized QPDFObjectHandle");
+#else
+        p << "null";
+#endif
     } else {
         obj->writeJSON(json_version, p);
     }
@@ -2421,7 +2453,11 @@ QPDFObjectHandle
 QPDFObjectHandle::shallowCopy()
 {
     if (!isInitialized()) {
+#ifndef QPDF_FUTURE
         throw std::logic_error("operation attempted on uninitialized QPDFObjectHandle");
+#else
+        return {};
+#endif
     }
     return {obj->copy()};
 }
@@ -2430,7 +2466,11 @@ QPDFObjectHandle
 QPDFObjectHandle::unsafeShallowCopy()
 {
     if (!isInitialized()) {
+#ifndef QPDF_FUTURE
         throw std::logic_error("operation attempted on uninitialized QPDFObjectHandle");
+#else
+        return {};
+#endif
     }
     return {obj->copy(true)};
 }
@@ -2439,6 +2479,9 @@ void
 QPDFObjectHandle::makeDirect(QPDFObjGen::set& visited, bool stop_at_streams)
 {
     assertInitialized();
+    if (!obj) {
+        return;
+    }
 
     auto cur_og = getObjGen();
     if (!visited.add(cur_og)) {
@@ -2508,9 +2551,11 @@ QPDFObjectHandle::makeDirect(bool allow_streams)
 void
 QPDFObjectHandle::assertInitialized() const
 {
+#ifndef QPDF_FUTURE
     if (!isInitialized()) {
         throw std::logic_error("operation attempted on uninitialized QPDFObjectHandle");
     }
+#endif
 }
 
 void
@@ -2520,10 +2565,16 @@ QPDFObjectHandle::typeWarning(char const* expected_type, std::string const& warn
     std::string description;
     // Type checks above guarantee that the object has been dereferenced. Nevertheless, dereference
     // throws exceptions in the test suite
+#ifdef QPDF_FUTURE
+    if (isInitialized()) {
+        obj->getDescription(context, description);
+    }
+#else
     if (!isInitialized()) {
         throw std::logic_error("attempted to dereference an uninitialized QPDFObjectHandle");
     }
-    this->obj->getDescription(context, description);
+    obj->getDescription(context, description);
+#endif
     // Null context handled by warn
     warn(
         context,
@@ -2533,7 +2584,7 @@ QPDFObjectHandle::typeWarning(char const* expected_type, std::string const& warn
             description,
             0,
             std::string("operation for ") + expected_type + " attempted on object of type " +
-                obj->getTypeName() + ": " + warning));
+                (obj ? obj->getTypeName() : "null") + ": " + warning));
 }
 
 #ifndef QPDF_FUTURE
