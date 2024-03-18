@@ -285,12 +285,6 @@ QPDFObjectHandle::asInlineImage() const
     return isInitialized() ? obj->as<QPDF_InlineImage>() : nullptr;
 }
 
-QPDF_Integer*
-QPDFObjectHandle::asInteger() const
-{
-    return isInitialized() ? obj->as<QPDF_Integer>() : nullptr;
-}
-
 QPDF_Name*
 QPDFObjectHandle::asName() const
 {
@@ -621,6 +615,82 @@ QPDFObjectHandle::getValueAsBool(bool& value) const
 // Integer accessors
 
 #ifndef QPDF_FUTURE
+QPDFObjectHandle::Integer
+QPDFObjectHandle::asInteger(bool optional)
+#else
+QPDFObjectHandle::Integer
+QPDFObjectHandle::asInteger(bool optional) const
+#endif
+{
+    if (isInteger()) {
+        return {*this, 1U};
+    }
+    if (isNull()) {
+        return {*this, optional ? 3U : 2U};
+    }
+    return {*this, 0U};
+}
+
+QPDFObjectHandle::Integer::operator long long()
+{
+    if (flags == 1U) {
+        if (auto ptr = oh.obj ? oh.obj->as<QPDF_Integer>() : nullptr) {
+            return ptr->getVal();
+        } else {
+            throw std::logic_error("object changed");
+        }
+    }
+    if (!flags.test(fl_valid)) {
+        oh.typeWarning("integer", "returning 0");
+    }
+    QTC::TC("qpdf", "QPDFObjectHandle integer returning 0");
+    return 0;
+}
+
+QPDFObjectHandle::Integer::operator int()
+{
+    auto value = operator long long();
+    if (value < INT_MIN) {
+        QTC::TC("qpdf", "QPDFObjectHandle int returning INT_MIN");
+        oh.warnIfPossible("requested value of integer is too small; returning INT_MIN");
+        return INT_MIN;
+    }
+    if (value > INT_MAX) {
+        QTC::TC("qpdf", "QPDFObjectHandle int returning INT_MAX");
+        oh.warnIfPossible("requested value of integer is too big; returning INT_MAX");
+        return INT_MAX;
+    }
+    return static_cast<int>(value);
+}
+
+QPDFObjectHandle::Integer::operator unsigned long long()
+{
+    auto value = operator long long();
+    if (value < 0) {
+        QTC::TC("qpdf", "QPDFObjectHandle uint returning 0");
+        oh.warnIfPossible("unsigned value request for negative number; returning 0");
+        return 0;
+    }
+    return static_cast<unsigned long long>(value);
+}
+
+QPDFObjectHandle::Integer::operator unsigned int()
+{
+    auto value = operator long long();
+    if (value < 0) {
+        QTC::TC("qpdf", "QPDFObjectHandle uint uint returning 0");
+        oh.warnIfPossible("unsigned integer value request for negative number; returning 0");
+        return 0;
+    }
+    if (value > UINT_MAX) {
+        QTC::TC("qpdf", "QPDFObjectHandle uint returning UINT_MAX");
+        oh.warnIfPossible("requested value of unsigned integer is too big; returning UINT_MAX");
+        return UINT_MAX;
+    }
+    return static_cast<unsigned int>(value);
+}
+
+#ifndef QPDF_FUTURE
 long long
 QPDFObjectHandle::getIntValue()
 #else
@@ -628,14 +698,7 @@ long long
 QPDFObjectHandle::getIntValue() const
 #endif
 {
-    auto integer = asInteger();
-    if (integer) {
-        return integer->getVal();
-    } else {
-        typeWarning("integer", "returning 0");
-        QTC::TC("qpdf", "QPDFObjectHandle integer returning 0");
-        return 0;
-    }
+    return asInteger();
 }
 
 #ifndef QPDF_FUTURE
@@ -646,12 +709,7 @@ bool
 QPDFObjectHandle::getValueAsInt(long long& value) const
 #endif
 {
-    auto integer = asInteger();
-    if (integer == nullptr) {
-        return false;
-    }
-    value = integer->getVal();
-    return true;
+    return asInteger().assign_to(value);
 }
 
 #ifndef QPDF_FUTURE
@@ -662,20 +720,7 @@ int
 QPDFObjectHandle::getIntValueAsInt() const
 #endif
 {
-    int result = 0;
-    long long v = getIntValue();
-    if (v < INT_MIN) {
-        QTC::TC("qpdf", "QPDFObjectHandle int returning INT_MIN");
-        warnIfPossible("requested value of integer is too small; returning INT_MIN");
-        result = INT_MIN;
-    } else if (v > INT_MAX) {
-        QTC::TC("qpdf", "QPDFObjectHandle int returning INT_MAX");
-        warnIfPossible("requested value of integer is too big; returning INT_MAX");
-        result = INT_MAX;
-    } else {
-        result = static_cast<int>(v);
-    }
-    return result;
+    return asInteger();
 }
 
 #ifndef QPDF_FUTURE
@@ -686,11 +731,7 @@ bool
 QPDFObjectHandle::getValueAsInt(int& value) const
 #endif
 {
-    if (!isInteger()) {
-        return false;
-    }
-    value = getIntValueAsInt();
-    return true;
+    return asInteger().assign_to(value);
 }
 
 #ifndef QPDF_FUTURE
@@ -701,14 +742,7 @@ unsigned long long
 QPDFObjectHandle::getUIntValue() const
 #endif
 {
-    long long v = getIntValue();
-    if (v < 0) {
-        QTC::TC("qpdf", "QPDFObjectHandle uint returning 0");
-        warnIfPossible("unsigned value request for negative number; returning 0");
-        return 0;
-    } else {
-        return static_cast<unsigned long long>(v);
-    }
+    return asInteger();
 }
 
 #ifndef QPDF_FUTURE
@@ -719,11 +753,7 @@ bool
 QPDFObjectHandle::getValueAsUInt(unsigned long long& value) const
 #endif
 {
-    if (!isInteger()) {
-        return false;
-    }
-    value = getUIntValue();
-    return true;
+    return asInteger().assign_to(value);
 }
 
 #ifndef QPDF_FUTURE
@@ -734,18 +764,7 @@ unsigned int
 QPDFObjectHandle::getUIntValueAsUInt() const
 #endif
 {
-    long long v = getIntValue();
-    if (v < 0) {
-        QTC::TC("qpdf", "QPDFObjectHandle uint uint returning 0");
-        warnIfPossible("unsigned integer value request for negative number; returning 0");
-        return 0;
-    } else if (v > UINT_MAX) {
-        QTC::TC("qpdf", "QPDFObjectHandle uint returning UINT_MAX");
-        warnIfPossible("requested value of unsigned integer is too big; returning UINT_MAX");
-        return UINT_MAX;
-    } else {
-        return static_cast<unsigned int>(v);
-    }
+    return asInteger();
 }
 
 #ifndef QPDF_FUTURE
@@ -756,11 +775,7 @@ bool
 QPDFObjectHandle::getValueAsUInt(unsigned int& value) const
 #endif
 {
-    if (!isInteger()) {
-        return false;
-    }
-    value = getUIntValueAsUInt();
-    return true;
+    return asInteger().assign_to(value);
 }
 
 // Real accessors

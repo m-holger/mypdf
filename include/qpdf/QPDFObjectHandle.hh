@@ -22,11 +22,15 @@
 #ifndef QPDFOBJECTHANDLE_HH
 #define QPDFOBJECTHANDLE_HH
 
+// Note: The header files must be included in the specified order
 #ifndef QPDF_FUTURE
 # include <qpdf/QPDFObjectHandle_core.hh>
 #else
 # include <qpdf/QPDFObjectHandle_future.hh>
 #endif
+
+#include <qpdf/QPDFObjectHandle_typed.hh>
+
 #include <qpdf/QPDFObjectHandle_inline.hh>
 
 // See qpdf/QPDFObjectHandle_core.hh for the definition of QPDFObjectHandle.

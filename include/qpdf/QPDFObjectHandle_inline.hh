@@ -242,4 +242,54 @@ QPDFObjectHandle::isInitialized() const
     return obj != nullptr;
 }
 
+inline QPDFObjectHandle::Typed::Typed(QPDFObjectHandle const& oh, Flags flags) :
+    oh(oh),
+    flags(flags)
+{
+}
+
+inline QPDFObjectHandle::Typed::Typed(QPDFObjectHandle&& oh, Flags flags) :
+    oh(std::move(oh)),
+    flags(flags)
+{
+}
+
+inline QPDFObjectHandle::Typed::operator QPDFObjectHandle() const
+{
+    return oh;
+}
+
+inline QPDFObjectHandle::Typed::operator bool() noexcept
+{
+    return flags.test(fl_valid);
+}
+
+inline QPDFObjectHandle::Typed::operator bool() const noexcept
+{
+    return flags.test(fl_valid);
+}
+
+inline bool
+QPDFObjectHandle::Typed::null() const noexcept
+{
+    return flags.test(fl_null);
+}
+
+inline QPDFObjGen
+QPDFObjectHandle::Typed::getObjGen() const
+{
+    return oh.getObjGen();
+}
+
+inline QPDFObjectHandle::Integer::Integer(QPDFObjectHandle const& oh, Flags flags) :
+    QPDFObjectHandle::Typed(oh, flags)
+{
+}
+
+inline long long
+QPDFObjectHandle::Integer::value()
+{
+    return *this;
+}
+
 #endif // QPDFOBJECTHANDLE_INLINE_HH
