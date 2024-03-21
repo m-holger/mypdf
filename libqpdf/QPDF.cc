@@ -2446,10 +2446,16 @@ QPDF::getCompressibleObjGens()
                     queue.push_back(value);
                 }
             }
-        } else if (obj.isDictionary()) {
-            std::set<std::string> keys = obj.getKeys();
-            for (auto iter = keys.rbegin(); iter != keys.rend(); ++iter) {
-                queue.push_back(obj.getKey(*iter));
+        } else if (auto dict = obj.asDictionary()) {
+            for (auto iter = dict.rbegin(); iter != dict.rend(); ++iter) {
+#ifndef QPDF_FUTURE
+                auto value = iter->second;
+                if (!value.isNull()) {
+#else
+                if (!iter->second.isNull()) {
+#endif
+                    queue.push_back(iter->second);
+                }
             }
         } else if (obj.isArray()) {
             int n = obj.getArrayNItems();

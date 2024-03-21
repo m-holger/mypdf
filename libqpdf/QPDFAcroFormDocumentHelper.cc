@@ -669,13 +669,25 @@ QPDFAcroFormDocumentHelper::adjustAppearanceStream(
     }
     // Deal with any any conflicts by re-merging with merge_with and updating our local copy of
     // dr_map, which we will use to modify the stream contents.
+
     resources.mergeResources(merge_with, &dr_map);
     // Remove empty subdictionaries
+#ifndef QPDF_FUTURE
     for (auto iter: resources.ditems()) {
         if (iter.second.isDictionary() && (iter.second.getKeys().size() == 0)) {
             resources.removeKey(iter.first);
         }
     }
+#else
+    auto rdict = resources.asDictionary();
+    for (auto it = rdict.begin(); it != rdict.end();) {
+        if (it->second.isDictionary() && it->second.getKeys().size() == 0) {
+            it = rdict.erase(it);
+        } else {
+            ++it;
+        }
+    }
+#endif
 
     // Now attach a token filter to replace the actual resources.
     ResourceFinder rf;

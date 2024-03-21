@@ -2321,9 +2321,9 @@ QPDFJob::shouldRemoveUnreferencedResources(QPDF& pdf)
                     return true;
                 }
             }
-            if (xobject.isDictionary()) {
-                for (auto const& k: xobject.getKeys()) {
-                    QPDFObjectHandle xobj = xobject.getKey(k);
+            if (auto xd = xobject.asDictionary()) {
+                for (auto const& item: xd) {
+                    QPDFObjectHandle xobj = item.second;
                     if (xobj.isFormXObject()) {
                         queue.push_back(xobj);
                     }
