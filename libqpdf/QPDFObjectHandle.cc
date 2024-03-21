@@ -274,7 +274,7 @@ QPDFObjectHandle::asBool() const
 }
 
 QPDF_Dictionary*
-QPDFObjectHandle::asDictionary() const
+QPDFObjectHandle::asDict() const
 {
     return isInitialized() ? obj->as<QPDF_Dictionary>() : nullptr;
 }
@@ -1224,6 +1224,37 @@ QPDFObjectHandle::eraseItemAndGetOld(int at)
 
 // Dictionary accessors
 
+static std::map<std::string, QPDFObjectHandle> empty_map;
+
+QPDFObjectHandle::Dictionary::Dictionary() :
+    items(empty_map)
+{
+}
+
+QPDFObjectHandle::Dictionary::Dictionary(
+    QPDFObjectHandle oh, Flags flags, std::map<std::string, QPDFObjectHandle>& items) :
+    QPDFObjectHandle::Typed(oh, flags),
+    items(items)
+{
+}
+
+#ifndef QPDF_FUTURE
+QPDFObjectHandle::Dictionary
+QPDFObjectHandle::asDictionary(bool optional)
+#else
+QPDFObjectHandle::Dictionary
+QPDFObjectHandle::asDictionary(bool optional) const
+#endif
+{
+    if (auto ptr = asDict()) {
+        return {*this, 1U, ptr->getAsMap()};
+    }
+    if (isNull()) {
+        return {*this, optional ? 3U : 2U, empty_map};
+    }
+    return {*this, 0U, empty_map};
+}
+
 QPDFObjectHandle::QPDFDictItems
 QPDFObjectHandle::ditems()
 {
@@ -1238,9 +1269,8 @@ bool
 QPDFObjectHandle::hasKey(std::string const& key) const
 #endif
 {
-    auto dict = asDictionary();
-    if (dict) {
-        return dict->hasKey(key);
+    if (auto dict = asDictionary()) {
+        return dict.contains(key);
     } else {
         typeWarning("dictionary", "returning false for a key containment request");
         QTC::TC("qpdf", "QPDFObjectHandle dictionary false for hasKey");
@@ -1256,7 +1286,7 @@ QPDFObjectHandle
 QPDFObjectHandle::getKey(std::string const& key) const
 #endif
 {
-    if (auto dict = asDictionary()) {
+    if (auto dict = asDict()) {
         return dict->getKey(key);
     } else {
         typeWarning("dictionary", "returning null for attempted key retrieval");
@@ -1286,7 +1316,7 @@ QPDFObjectHandle::getKeys() const
 #endif
 {
     std::set<std::string> result;
-    auto dict = asDictionary();
+    auto dict = asDict();
     if (dict) {
         result = dict->getKeys();
     } else {
@@ -1305,7 +1335,7 @@ QPDFObjectHandle::getDictAsMap() const
 #endif
 {
     std::map<std::string, QPDFObjectHandle> result;
-    auto dict = asDictionary();
+    auto dict = asDict();
     if (dict) {
         result = dict->getAsMap();
     } else {
@@ -1508,7 +1538,7 @@ QPDFObjectHandle::getUniqueResourceName(
 void
 QPDFObjectHandle::replaceKey(std::string const& key, QPDFObjectHandle const& value)
 {
-    auto dict = asDictionary();
+    auto dict = asDict();
     if (dict) {
         checkOwnership(value);
         dict->replaceKey(key, value);
@@ -1536,7 +1566,7 @@ QPDFObjectHandle::replaceKeyAndGetOld(std::string const& key, QPDFObjectHandle c
 void
 QPDFObjectHandle::removeKey(std::string const& key)
 {
-    auto dict = asDictionary();
+    auto dict = asDict();
     if (dict) {
         dict->removeKey(key);
     } else {
@@ -1549,7 +1579,7 @@ QPDFObjectHandle
 QPDFObjectHandle::removeKeyAndGetOld(std::string const& key)
 {
     auto result = QPDFObjectHandle::newNull();
-    auto dict = asDictionary();
+    auto dict = asDict();
     if (dict) {
         result = dict->getKey(key);
     }
@@ -2468,7 +2498,7 @@ QPDFObjectHandle::makeDirect(QPDFObjGen::set& visited, bool stop_at_streams)
         this->obj = QPDF_Array::create(items);
     } else if (isDictionary()) {
         std::map<std::string, QPDFObjectHandle> items;
-        auto dict = asDictionary();
+        auto dict = asDict();
         for (auto const& key: getKeys()) {
             items[key] = dict->getKey(key);
             items[key].makeDirect(visited, stop_at_streams);

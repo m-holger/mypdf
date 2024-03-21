@@ -85,7 +85,7 @@ class QPDFObjectHandle::Integer: public QPDFObjectHandle::Typed
     bool
     assign_to(T& var)
     {
-        if (flags.test(0)) {
+        if (flags.test(fl_valid)) {
             var = *this;
             return true;
         }
@@ -95,6 +95,48 @@ class QPDFObjectHandle::Integer: public QPDFObjectHandle::Typed
   private:
     Integer() = default;
     inline Integer(QPDFObjectHandle const& oh, Flags flags);
+};
+
+class QPDFObjectHandle::Dictionary: public QPDFObjectHandle::Typed
+{
+    friend class QPDFObjectHandle;
+    using objmap = std::map<std::string, QPDFObjectHandle>;
+
+  public:
+    class iterator;
+
+    using const_iterator = objmap::const_iterator;
+    using reverse_iterator = objmap::reverse_iterator;
+
+    QPDF_DLL
+    iterator inline begin() const noexcept;
+
+    QPDF_DLL
+    inline iterator end() const noexcept;
+
+    QPDF_DLL
+    inline reverse_iterator rbegin() const noexcept;
+
+    QPDF_DLL
+    inline reverse_iterator rend() const noexcept;
+
+    QPDF_DLL
+    inline bool contains(std::string const& key, bool exclude_nulls = true) const;
+
+    QPDF_DLL
+    inline iterator erase(iterator pos);
+
+    QPDF_DLL
+    inline size_t erase(std::string const& key);
+
+    QPDF_DLL
+    inline size_t size(bool exclude_nulls = true) const;
+
+  private:
+    Dictionary();
+    Dictionary(QPDFObjectHandle, Flags, objmap&);
+
+    objmap& items;
 };
 
 #endif // QPDFOBJECTHANDLE_TYPED_HH

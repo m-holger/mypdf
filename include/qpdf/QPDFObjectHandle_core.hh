@@ -67,6 +67,7 @@ class QPDFObjectHandle
 
   public:
     class Typed;
+    class Dictionary;
     class Integer;
 
     // This class is used by replaceStreamData.  It provides an alternative way of associating
@@ -757,6 +758,9 @@ class QPDFObjectHandle
     QPDF_DLL
     QPDFDictItems ditems();
 
+    QPDF_DLL
+    QPDFObjectHandle::Dictionary asDictionary(bool optional = false);
+
     // Return true if key is present.  Keys with null values are treated as if they are not present.
     // This is as per the PDF spec.
     QPDF_DLL
@@ -1363,7 +1367,7 @@ class QPDFObjectHandle
   private:
     QPDF_Array* asArray() const;
     QPDF_Bool* asBool() const;
-    QPDF_Dictionary* asDictionary() const;
+    QPDF_Dictionary* asDict() const;
     QPDF_InlineImage* asInlineImage() const;
     QPDF_Name* asName() const;
     QPDF_Null* asNull() const;

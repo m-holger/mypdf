@@ -292,4 +292,84 @@ QPDFObjectHandle::Integer::value()
     return *this;
 }
 
+class QPDFObjectHandle::Dictionary::iterator
+    : public std::map<std::string, QPDFObjectHandle>::iterator
+{
+  public:
+    value_type const&
+    operator*() const noexcept
+    {
+        return objmap::iterator::operator*();
+    }
+    objmap::const_pointer
+    operator->() const noexcept
+    {
+        return objmap::iterator::operator->();
+    }
+
+  private:
+    friend class QPDFObjectHandle::Dictionary;
+
+    iterator(objmap::iterator it) :
+        objmap::iterator(it)
+    {
+    }
+};
+
+inline QPDFObjectHandle::Dictionary::iterator
+QPDFObjectHandle::Dictionary::begin() const noexcept
+{
+    return {items.begin()};
+}
+
+inline QPDFObjectHandle::Dictionary::iterator
+QPDFObjectHandle::Dictionary::end() const noexcept
+{
+    return {items.end()};
+}
+
+inline QPDFObjectHandle::Dictionary::reverse_iterator
+QPDFObjectHandle::Dictionary::rbegin() const noexcept
+{
+    return items.rbegin();
+}
+
+inline QPDFObjectHandle::Dictionary::reverse_iterator
+QPDFObjectHandle::Dictionary::rend() const noexcept
+{
+    return items.rend();
+}
+
+inline bool
+QPDFObjectHandle::Dictionary::contains(std::string const& key, bool exclude_nulls) const
+{
+    if (!exclude_nulls) {
+        return items.count(key);
+    }
+    auto it = items.find(key);
+    return it != items.end() && !it->second.isNull();
+}
+
+inline QPDFObjectHandle::Dictionary::iterator
+QPDFObjectHandle::Dictionary::erase(iterator pos)
+{
+    return items.erase(pos);
+}
+
+inline size_t
+QPDFObjectHandle::Dictionary::erase(std::string const& key)
+{
+    return items.erase(key);
+}
+
+inline size_t
+QPDFObjectHandle::Dictionary::size(bool exclude_nulls) const
+{
+    if (!exclude_nulls) {
+        return items.size();
+    }
+    return static_cast<size_t>(
+        std::count_if(items.begin(), items.end(), [](auto& p) { return !p.second.isNull(); }));
+}
+
 #endif // QPDFOBJECTHANDLE_INLINE_HH
