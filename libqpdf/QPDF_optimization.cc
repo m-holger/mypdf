@@ -313,24 +313,30 @@ QPDF::updateObjectMapsInternal(
             }
         }
 
-        for (auto const& key: dict.getKeys()) {
-            if (is_page_node && (key == "/Thumb")) {
-                // Traverse page thumbnail dictionaries as a special case.
-                updateObjectMapsInternal(
-                    ObjUser(ObjUser::ou_thumb, ou.pageno),
-                    dict.getKey(key),
-                    skip_stream_parameters,
-                    visited,
-                    false);
-            } else if (is_page_node && (key == "/Parent")) {
-                // Don't traverse back up the page tree
-            } else if (
-                ((ssp >= 1) && (key == "/Length")) ||
-                ((ssp >= 2) && ((key == "/Filter") || (key == "/DecodeParms")))) {
-                // Don't traverse into stream parameters that we are not going to write.
-            } else {
-                updateObjectMapsInternal(
-                    ou, dict.getKey(key), skip_stream_parameters, visited, false);
+        for (auto const& [key, value]: dict.asDictionary()) {
+#ifndef QPDF_FUTURE
+            auto v = value;
+            if (!v.isNull()) {
+#else
+            if (!value.isNull()) {
+#endif
+                if (is_page_node && (key == "/Thumb")) {
+                    // Traverse page thumbnail dictionaries as a special case.
+                    updateObjectMapsInternal(
+                        ObjUser(ObjUser::ou_thumb, ou.pageno),
+                        value,
+                        skip_stream_parameters,
+                        visited,
+                        false);
+                } else if (is_page_node && (key == "/Parent")) {
+                    // Don't traverse back up the page tree
+                } else if (
+                    ((ssp >= 1) && (key == "/Length")) ||
+                    ((ssp >= 2) && ((key == "/Filter") || (key == "/DecodeParms")))) {
+                    // Don't traverse into stream parameters that we are not going to write.
+                } else {
+                    updateObjectMapsInternal(ou, value, skip_stream_parameters, visited, false);
+                }
             }
         }
     }
