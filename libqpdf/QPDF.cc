@@ -2133,7 +2133,7 @@ QPDF::reserveObjects(QPDFObjectHandle foreign, ObjCopier& obj_copier, bool top)
 #else
             if (!value.isNull()) {
 #endif
-                reserveObjects(foreign.getKey(key), obj_copier, false);
+                reserveObjects(value, obj_copier, false);
             }
         }
     } else if (foreign_tc == ::ot_stream) {
@@ -2432,11 +2432,10 @@ QPDF::getCompressibleObjGens()
             }
         }
         if (obj.isStream()) {
-            QPDFObjectHandle dict = obj.getDict();
-            std::set<std::string> keys = dict.getKeys();
-            for (auto iter = keys.rbegin(); iter != keys.rend(); ++iter) {
-                std::string const& key = *iter;
-                QPDFObjectHandle value = dict.getKey(key);
+            auto dict = obj.getDict().asDictionary();
+            for (auto iter = dict.rbegin(); iter != dict.rend(); ++iter) {
+                std::string const& key = iter->first;
+                auto value = iter->second;
                 if (key == "/Length") {
                     // omit stream lengths
                     if (value.isIndirect()) {

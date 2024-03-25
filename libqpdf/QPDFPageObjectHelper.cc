@@ -332,15 +332,13 @@ QPDFPageObjectHelper::forEachXObject(
         auto& ph = queue.front();
         if (seen.add(ph)) {
             auto xobj_dict = ph.getAttribute("/Resources", false).getKeyIfDict("/XObject");
-            if (xobj_dict.isDictionary()) {
-                for (auto const& key: xobj_dict.getKeys()) {
-                    QPDFObjectHandle obj = xobj_dict.getKey(key);
-                    if ((!selector) || selector(obj)) {
-                        action(obj, xobj_dict, key);
-                    }
-                    if (recursive && obj.isFormXObject()) {
-                        queue.emplace_back(obj);
-                    }
+            for (auto const& [key, value]: xobj_dict.asDictionary()) {
+                auto obj = value;
+                if ((!selector) || selector(obj)) {
+                    action(obj, xobj_dict, key);
+                }
+                if (recursive && obj.isFormXObject()) {
+                    queue.emplace_back(obj);
                 }
             }
         }

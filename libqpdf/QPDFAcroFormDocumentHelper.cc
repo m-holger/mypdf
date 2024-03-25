@@ -681,11 +681,13 @@ QPDFAcroFormDocumentHelper::adjustAppearanceStream(
 #else
     auto rdict = resources.asDictionary();
     for (auto it = rdict.begin(); it != rdict.end();) {
-        if (it->second.isDictionary() && it->second.getKeys().size() == 0) {
-            it = rdict.erase(it);
-        } else {
-            ++it;
+        if (auto child = it->second.asDictionary()) {
+            if (child.size() == 0) {
+                it = rdict.erase(it);
+                continue;
+            }
         }
+        ++it;
     }
 #endif
 

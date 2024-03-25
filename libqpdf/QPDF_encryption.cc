@@ -859,9 +859,13 @@ QPDF::initializeEncryption()
     }
 
     if ((V == 4) || (V == 5)) {
-        QPDFObjectHandle CF = encryption_dict.getKey("/CF");
-        for (auto const& filter: CF.getKeys()) {
-            QPDFObjectHandle cdict = CF.getKey(filter);
+        auto CF = encryption_dict.getKey("/CF").asDictionary();
+#ifndef QPDF_FUTURE
+        for (auto const& [filter, cd]: CF) {
+            QPDFObjectHandle cdict = cd;
+#else
+        for (auto const& [filter, cdict]: CF) {
+#endif
             if (cdict.isDictionary()) {
                 encryption_method_e method = e_none;
                 if (cdict.getKey("/CFM").isName()) {

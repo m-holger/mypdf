@@ -1566,9 +1566,8 @@ QPDFObjectHandle::replaceKeyAndGetOld(std::string const& key, QPDFObjectHandle c
 void
 QPDFObjectHandle::removeKey(std::string const& key)
 {
-    auto dict = asDict();
-    if (dict) {
-        dict->removeKey(key);
+    if (auto dict = asDictionary()) {
+        dict.erase(key);
     } else {
         typeWarning("dictionary", "ignoring key removal request");
         QTC::TC("qpdf", "QPDFObjectHandle dictionary ignoring removeKey");
