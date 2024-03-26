@@ -2053,7 +2053,7 @@ QPDF::copyForeignObject(QPDFObjectHandle foreign)
 
     // Make sure we have an object in this file for every referenced object in the old file.
     // obj_copier.object_map maps foreign QPDFObjGen to local objects.  For everything new that we
-    // have to copy, the local object will be a reservation, unless it is a stream, in which case
+    // have to copy, the local object will be an indirect null, unless it is a stream, in which case
     // the local object will already be a stream.
     reserveObjects(foreign, obj_copier, true);
 
@@ -2073,8 +2073,10 @@ QPDF::copyForeignObject(QPDFObjectHandle foreign)
 
     auto og = foreign.getObjGen();
     if (!obj_copier.object_map.count(og)) {
-        warn(damagedPDF("unexpected reference to /Pages object while copying foreign object; "
-                        "replacing with null"));
+        if (foreign.isPagesObject()) {
+            warn(damagedPDF("unexpected reference to /Pages object while copying foreign object; "
+                            "replacing with null"));
+        }
         return QPDFObjectHandle::newNull();
     }
     return obj_copier.object_map[foreign.getObjGen()];
@@ -2127,14 +2129,7 @@ QPDF::reserveObjects(QPDFObjectHandle foreign, ObjCopier& obj_copier, bool top)
     } else if (foreign_tc == ::ot_dictionary) {
         QTC::TC("qpdf", "QPDF reserve dictionary");
         for (auto const& [key, value]: foreign.asDictionary()) {
-#ifndef QPDF_FUTURE
-            auto v = value;
-            if (!v.isNull()) {
-#else
-            if (!value.isNull()) {
-#endif
-                reserveObjects(value, obj_copier, false);
-            }
+            reserveObjects(value, obj_copier, false);
         }
     } else if (foreign_tc == ::ot_stream) {
         QTC::TC("qpdf", "QPDF reserve stream");
@@ -2147,14 +2142,22 @@ QPDF::reserveObjects(QPDFObjectHandle foreign, ObjCopier& obj_copier, bool top)
 QPDFObjectHandle
 QPDF::replaceForeignIndirectObjects(QPDFObjectHandle foreign, ObjCopier& obj_copier, bool top)
 {
+    static QPDFObjectHandle null_oh = QPDFObjectHandle::newNull();
+
     auto foreign_tc = foreign.getTypeCode();
+
+    if (foreign_tc == ::ot_null) {
+        // There is never a need to copy a foreign null.
+        return null_oh;
+    }
+
     QPDFObjectHandle result;
     if ((!top) && foreign.isIndirect()) {
         QTC::TC("qpdf", "QPDF replace indirect");
         auto mapping = obj_copier.object_map.find(foreign.getObjGen());
         if (mapping == obj_copier.object_map.end()) {
             // This case would occur if this is a reference to a Pages object that we didn't
-            // traverse into.
+            // traverse into or if we encountered a dangling reference.
             QTC::TC("qpdf", "QPDF replace foreign indirect with null");
             result = QPDFObjectHandle::newNull();
         } else {
@@ -2173,14 +2176,7 @@ QPDF::replaceForeignIndirectObjects(QPDFObjectHandle foreign, ObjCopier& obj_cop
         QTC::TC("qpdf", "QPDF replace dictionary");
         result = QPDFObjectHandle::newDictionary();
         for (auto const& [key, value]: foreign.asDictionary()) {
-#ifndef QPDF_FUTURE
-            auto v = value;
-            if (!v.isNull()) {
-#else
-            if (!value.isNull()) {
-#endif
-                result.replaceKey(key, replaceForeignIndirectObjects(value, obj_copier, false));
-            }
+            result.replaceKey(key, replaceForeignIndirectObjects(value, obj_copier, false));
         }
     } else if (foreign_tc == ::ot_stream) {
         QTC::TC("qpdf", "QPDF replace stream");
@@ -2188,14 +2184,7 @@ QPDF::replaceForeignIndirectObjects(QPDFObjectHandle foreign, ObjCopier& obj_cop
         result.assertStream();
         QPDFObjectHandle dict = result.getDict();
         for (auto const& [key, value]: foreign.getDict().asDictionary()) {
-#ifndef QPDF_FUTURE
-            auto v = value;
-            if (!v.isNull()) {
-#else
-            if (!value.isNull()) {
-#endif
-                dict.replaceKey(key, replaceForeignIndirectObjects(value, obj_copier, false));
-            }
+            dict.replaceKey(key, replaceForeignIndirectObjects(value, obj_copier, false));
         }
         copyStreamData(result, foreign);
     } else {
