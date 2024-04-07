@@ -1490,10 +1490,8 @@ QPDFObjectHandle::getResourceNames() const
 {
     // Return second-level dictionary keys
     std::set<std::string> result;
-    if (!isDictionary()) {
-        return result;
-    }
-    for (auto const& key: getKeys()) {
+    for (auto const& item: asDictionary()) {
+
         QPDFObjectHandle val = getKey(key);
         if (val.isDictionary()) {
             for (auto const& val_key: val.getKeys()) {
