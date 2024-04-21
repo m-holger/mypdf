@@ -311,7 +311,7 @@ class QPDFObjectHandle
     QPDF_DLL
     qpdf_object_type_e getTypeCode() const;
     QPDF_DLL
-    char const* getTypeName();
+    char const* getTypeName() const;
 
     // Exactly one of these will return true for any initialized object. Operator and InlineImage
     // are only allowed in content streams.
