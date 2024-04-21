@@ -37,3 +37,11 @@ augmented with methods, and the JSON class, where
 In addition to the split into public and private header files I have added FUTURE header files where the changes I
 perceive should happen for qpdf 12 would make header files unreadable if both live and FUTURE versions are included
 in the same header file.
+
+### Future changes
+
+Make QPDFObjecthandle accessor methods const where possible.
+
+Treat uninitialized QPDFObjecthandles as null objects. See qpdf PR1179 for a summary of the rational. 
+
+

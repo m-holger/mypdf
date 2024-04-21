@@ -255,8 +255,13 @@ QPDFObjectHandle::getTypeCode() const
     return isInitialized() ? obj->getResolvedTypeCode() : ::ot_uninitialized;
 }
 
+#ifndef QPDF_FUTURE
 char const*
 QPDFObjectHandle::getTypeName()
+#else
+char const*
+QPDFObjectHandle::getTypeName() const
+#endif
 {
     return isInitialized() ? this->obj->getTypeName() : "uninitialized";
 }

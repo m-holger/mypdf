@@ -24,3 +24,7 @@ Change Log
   large number of them) as a first encounter will resolve them.
 
 - Make QPDFObjectHandle accessor const where possible. This relies on the refactoring of resolving unresolved objects. 
+
+2024-04-21
+
+- Make QPDFObjectHandle::getTypeName also const (omission in last change).
