@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-// ABI: inline and pass og by value
+#ifndef QPDF_FUTURE
 std::ostream&
 operator<<(std::ostream& os, const QPDFObjGen& og)
 {
@@ -27,10 +27,8 @@ QPDFObjGen::set::add(QPDFObjectHandle const& oh)
     if (auto* ptr = oh.getObjectPtr()) {
         return add(ptr->getObjGen());
     } else {
-#ifndef QPDF_FUTURE
         throw std::logic_error(
             "attempt to retrieve QPDFObjGen from uninitialized QPDFObjectHandle");
-#endif
         return true;
     }
 }
@@ -41,10 +39,8 @@ QPDFObjGen::set::add(QPDFObjectHelper const& helper)
     if (auto* ptr = helper.getObjectHandle().getObjectPtr()) {
         return add(ptr->getObjGen());
     } else {
-#ifndef QPDF_FUTURE
         throw std::logic_error(
             "attempt to retrieve QPDFObjGen from uninitialized QPDFObjectHandle");
-#endif
         return true;
     }
 }
@@ -55,10 +51,8 @@ QPDFObjGen::set::erase(QPDFObjectHandle const& oh)
     if (auto* ptr = oh.getObjectPtr()) {
         erase(ptr->getObjGen());
     } else {
-#ifndef QPDF_FUTURE
         throw std::logic_error(
             "attempt to retrieve QPDFObjGen from uninitialized QPDFObjectHandle");
-#endif
     }
 }
 
@@ -68,9 +62,8 @@ QPDFObjGen::set::erase(QPDFObjectHelper const& helper)
     if (auto* ptr = helper.getObjectHandle().getObjectPtr()) {
         erase(ptr->getObjGen());
     } else {
-#ifndef QPDF_FUTURE
         throw std::logic_error(
             "attempt to retrieve QPDFObjGen from uninitialized QPDFObjectHandle");
-#endif
     }
 }
+#endif

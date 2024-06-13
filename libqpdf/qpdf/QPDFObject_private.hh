@@ -71,7 +71,7 @@ class QPDFObject
         return value->qpdf;
     }
     QPDFObjGen
-    getObjGen() const
+    getObjGen() const noexcept
     {
         return value->og;
     }

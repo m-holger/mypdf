@@ -53,6 +53,16 @@ class QPDF_DLL_CLASS QPDFObjectHelper
     {
         return this->oh;
     }
+    QPDF_DLL
+    operator QPDFObjectHandle() const noexcept
+    {
+        return oh;
+    }
+    QPDF_DLL
+    operator QPDFObjGen() const noexcept
+    {
+        return oh.getObjGen();
+    }
 
   protected:
 #ifdef QPDF_FUTURE
